@@ -7,6 +7,7 @@ class UserServiceImpl(UserService):
         self.user_repo = user_repository
         
     async def create_user(self, sign_up_model: SignUpModel):
+        sign_up_model.hashed_password()
         await self.user_repo.insert(
             user_model= UserModel(**sign_up_model.model_dump())
         )

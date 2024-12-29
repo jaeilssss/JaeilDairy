@@ -1,0 +1,18 @@
+# Python 캐시 디렉토리
+__pycache__/
+*.py[cod]
+*.pyo
+
+# 환경 설정 파일
+.env
+*.env
+
+# 가상 환경 디렉토리
+venv/
+.env/
+
+# 테스트/빌드 디렉토리
+*.egg-info/
+dist/
+build/
+
