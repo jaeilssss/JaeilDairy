@@ -1,0 +1,1 @@
+from src.service.model.sign_up_model import SignUpModel
