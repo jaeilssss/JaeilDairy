@@ -2,10 +2,14 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from container import AppContainer
 from sqlalchemy import text
+
 container = AppContainer()
-# container.wire(modules=["__main__"])
+container.wire(modules=["__main__"])
+
+
 @asynccontextmanager
 async def life_span(app: FastAPI):
+    app.container = container
     async with container.engine().connect() as connection:
         await connection.execute(text("SELECT 1"))  # 연결 확인용 쿼리
         print("Database connection initialized")

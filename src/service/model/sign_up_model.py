@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from common.function.password_util import hash_password
+from src.common.function.password_util import hash_password
 class SignUpModel(BaseModel):
     name: str
     email: str
@@ -11,4 +11,4 @@ class SignUpModel(BaseModel):
     updated_at: datetime = datetime.now()
     
     def hashed_password(self):
-       password = hash_password(self.password)
+       self.password = hash_password(self.password)
