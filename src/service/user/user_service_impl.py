@@ -7,7 +7,7 @@ from src.service.model.renew_token_model import RenewTokenModel
 from src.service.user import UserService
 from src.service.model import SignUpModel, LoginModel, LoginResponseModel
 from src.repository.user import UserRepository
-from src.common.entity.user import UserModel
+from src.common.entity.user.user_model import User
 from src.common.exception.user_exception import (
     NotFoundUserError,
     ValidationEmailError,
@@ -32,7 +32,7 @@ class UserServiceImpl(UserService):
         self.secret_key = os.getenv("JWT_SECRET_KEY")
         self.algorithm = os.getenv("JWT_ALGORITHM")
         self.ACCESS_TOKEN_EXPIRE_MINUTES = 30
-        self.REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7
+        self.REFRESH_TOKEN_EXPIRE_MINUTES = 600 * 24 * 7
 
     async def create_user(self, sign_up_model: SignUpModel):
         sign_up_model.hashed_password()
@@ -42,7 +42,7 @@ class UserServiceImpl(UserService):
         if user is not None:
             raise ValidationEmailError
 
-        await self.user_repo.insert(user_model=UserModel(**sign_up_model.model_dump()))
+        await self.user_repo.insert(user_model=User(**sign_up_model.model_dump()))
 
     async def login(self, login_model: LoginModel):
         user = await self.user_repo.find_user_by_email(
@@ -74,7 +74,7 @@ class UserServiceImpl(UserService):
 
         return FindMyUserInfoResponseModel.model_validate(user)
 
-    def __generate_token(self, user: UserModel):
+    def __generate_token(self, user: User):
         access_dict = {"user_id": user.id, "email": user.email}
         refresh_dict = {"user_id": user.id}
 
