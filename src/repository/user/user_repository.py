@@ -1,12 +1,12 @@
 from abc import ABCMeta, abstractmethod
-from src.common.entity.user import UserModel
+from src.common.entity.user.user_model import User
 from src.repository.model import FindUserByEmailRequestModel
 
 
 class UserRepository(metaclass=ABCMeta):
 
     @abstractmethod
-    async def insert(self, user_model: UserModel):
+    async def insert(self, user_model: User):
         pass
 
     @abstractmethod

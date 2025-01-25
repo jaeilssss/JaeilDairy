@@ -36,7 +36,6 @@ class JWTUserAuth(HTTPBearer):
         if token_type != "Bearer":
             raise JWTBadRequestError
         try:
-            print(token)
             payload = self.decoder.decode(token)
 
             if not payload:
