@@ -1,10 +1,15 @@
 from fastapi import APIRouter, Depends
+from service.model.user.logout_model import LogoutRequest
 from src.service.model.find_my_user_info_model import (
     FindMyUserInfoModel,
     FindMyUserInfoResponseModel,
 )
 from src.service.model.renew_token_model import RenewTokenModel
-from src.service.user.jwt_user_auth import JWTUserAuth, get_token_data
+from src.service.user.jwt_user_auth import (
+    JWTUserAuth,
+    get_access_token,
+    get_token_data,
+)
 from src.controller.model.renew_token_body_model import RenewTokenBodyModel
 from src.controller.model.response import BaseResponse, BaseResponseData
 from src.service.model.login_model import LoginResponseModel
@@ -76,3 +81,21 @@ async def get_my_info(
     )
 
     return BaseResponseData(result=result)
+
+
+@user_router.get(
+    path="/logout",
+    summary="로그아웃 API",
+    response_model=BaseResponse,
+    dependencies=[Depends(JWTUserAuth())],
+)
+@inject
+async def logout(
+    service: UserService = Depends(Provide[AppContainer.user_service]),
+    token_info: dict = Depends(get_token_data),
+    access_token: str = Depends(get_access_token),
+):
+    await service.logout(
+        LogoutRequest(access_token=access_token, exp=token_info["exp"])
+    )
+    return BaseResponse

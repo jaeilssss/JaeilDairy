@@ -43,8 +43,10 @@ class JWTUserAuth(HTTPBearer):
 
             user_id = payload.get("user_id")
             email = payload.get("email")
+            exp = payload.get("exp")
 
             request.state.token_info = payload
+            request.state.access_token = token
             if user_id is None or email is None:
                 raise JWTBadRequestError
         except Exception as e:
@@ -54,3 +56,7 @@ class JWTUserAuth(HTTPBearer):
 
 def get_token_data(request: Request) -> dict:
     return request.state.token_info
+
+
+def get_access_token(request: Request) -> str:
+    return request.state.access_token
