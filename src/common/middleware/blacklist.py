@@ -23,5 +23,5 @@ async def blacklist_middleware(
         if result:
             raise LogoutJWTError
 
-    response = call_next(request)
+    response = await call_next(request)
     return response
