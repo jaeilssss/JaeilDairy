@@ -1,5 +1,8 @@
 from operator import and_
-from sqlalchemy import Delete, Select, and_, delete, update
+from sqlalchemy import Delete, and_, delete, update
+from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
+
 from src.repository.model.schedule.update_schedule_request_model import (
     UpdateScheduleRequestModel,
 )
@@ -24,12 +27,16 @@ class ScheduleRepositoryImpl(ScheduleRepository):
         self, find_my_all_schedule: FindAllScheduleRequestModel
     ):
         # 기본 query 생성
-        query = Select(Schedule).where(
-            and_(
-                Schedule.user_id == find_my_all_schedule.user_id,
-                Schedule.created_at >= find_my_all_schedule.start_date,
-                Schedule.created_at <= find_my_all_schedule.end_date,
+        query = (
+            select(Schedule)
+            .where(
+                and_(
+                    Schedule.user_id == find_my_all_schedule.user_id,
+                    Schedule.created_at >= find_my_all_schedule.start_date,
+                    Schedule.created_at <= find_my_all_schedule.end_date,
+                )
             )
+            .options(selectinload(Schedule.user))
         )
 
         # 타입이 ALL이 아니면 type 필터 추가
@@ -38,7 +45,7 @@ class ScheduleRepositoryImpl(ScheduleRepository):
 
         # 쿼리 실행
         result = await self.db.execute(query)
-
+        print("여기 읽힘")
         return result.scalars().all()
 
     async def update_schedule(self, update_schedule: UpdateScheduleRequestModel):

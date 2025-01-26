@@ -36,3 +36,9 @@ class NotFoundUserError(BaseExceptionHanlder):
     status_code: int = status.HTTP_404_NOT_FOUND
     code: str = "USER_ERROR_006"
     message: str = "유저 정보가 없습니다."
+
+
+class LogoutJWTError(BaseExceptionHanlder):
+    status_code: int = (status.HTTP_401_UNAUTHORIZED,)
+    code: str = ("USER_ERROR_007",)
+    message: str = "이미 로그아웃 한 유저 입니다."

@@ -1,3 +1,4 @@
+from pydantic import BaseModel
 from sqlalchemy import Column, ForeignKey, Integer, func, String, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
@@ -23,3 +24,21 @@ class Schedule(Base):
     user_id = Column(Integer, ForeignKey("user.user_id"))
 
     user = relationship("User")
+
+
+class ScheduleResponse(BaseModel):
+    title: str
+    content: str
+    date: str
+    type: ScheduleTypeEnum
+    user_name: str
+
+    @classmethod
+    def convert(cls, schedule: Schedule):
+        return cls(
+            title=schedule.title,
+            content=schedule.content,
+            date=schedule.content,
+            type=schedule.type,
+            user_name=schedule.user.name,
+        )

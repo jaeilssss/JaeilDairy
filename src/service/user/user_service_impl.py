@@ -1,4 +1,10 @@
+from datetime import datetime
 import os
+from zoneinfo import ZoneInfo
+
+from aioredis import Redis
+from service.model.user.logout_model import LogoutRequest
+from service.redis.redis_service import RedisService
 from src.service.model.find_my_user_info_model import (
     FindMyUserInfoModel,
     FindMyUserInfoResponseModel,
@@ -25,6 +31,7 @@ class UserServiceImpl(UserService):
         user_repository: UserRepository,
         jwt_encoder: AbstractJWTEncoder,
         jwt_decoder: AbstractJWTDecoder,
+        redis_service: RedisService,
     ):
         self.user_repo = user_repository
         self.jwt_encoder = jwt_encoder
@@ -32,7 +39,8 @@ class UserServiceImpl(UserService):
         self.secret_key = os.getenv("JWT_SECRET_KEY")
         self.algorithm = os.getenv("JWT_ALGORITHM")
         self.ACCESS_TOKEN_EXPIRE_MINUTES = 30
-        self.REFRESH_TOKEN_EXPIRE_MINUTES = 600 * 24 * 7
+        self.REFRESH_TOKEN_EXPIRE_MINUTES = 60000 * 24 * 7
+        self.redis_service = redis_service
 
     async def create_user(self, sign_up_model: SignUpModel):
         sign_up_model.hashed_password()
@@ -73,6 +81,16 @@ class UserServiceImpl(UserService):
             raise NotFoundUserError
 
         return FindMyUserInfoResponseModel.model_validate(user)
+
+    async def logout(self, logout_request: LogoutRequest):
+        now = int(datetime.now(ZoneInfo("Asia/Seoul")).timestamp())
+        ttl = logout_request.exp - now
+
+        if ttl < 0:
+            print("???")
+
+        print(logout_request.access_token)
+        await self.redis_service.set(logout_request.access_token, value="1", ttl=ttl)
 
     def __generate_token(self, user: User):
         access_dict = {"user_id": user.id, "email": user.email}
