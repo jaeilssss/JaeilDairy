@@ -17,7 +17,7 @@ async def blacklist_middleware(
     redis_service = AppContainer.redis_service()
     token = request.headers.get("Authorization")
 
-    if not request.url.replace(request.base_url) in exclusive_end_point:
+    if token is not None:
         token = token.replace("Bearer ", "")
         result = await redis_service.get(token)
         if result:
