@@ -3,8 +3,8 @@ import os
 from zoneinfo import ZoneInfo
 
 from aioredis import Redis
-from service.model.user.logout_model import LogoutRequest
-from service.redis.redis_service import RedisService
+from src.service.model.user.logout_model import LogoutRequest
+from src.service.redis.redis_service import RedisService
 from src.service.model.find_my_user_info_model import (
     FindMyUserInfoModel,
     FindMyUserInfoResponseModel,

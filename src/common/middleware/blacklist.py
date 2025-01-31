@@ -1,8 +1,8 @@
 from fastapi import Depends, Request
 
-from common.exception.user_exception import LogoutJWTError
+from src.common.exception.user_exception import LogoutJWTError
 from container import AppContainer
-from service.redis import redis_service
+from src.service.redis import redis_service
 from src.service.redis.redis_service import RedisService
 from dependency_injector.wiring import Provide, inject
 

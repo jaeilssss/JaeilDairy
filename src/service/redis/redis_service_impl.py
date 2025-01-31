@@ -2,7 +2,7 @@ import json
 from typing import List
 from aioredis import Redis
 from requests import delete
-from service.redis.redis_service import RedisService
+from src.service.redis.redis_service import RedisService
 
 
 class RedisServiceImpl(RedisService):
