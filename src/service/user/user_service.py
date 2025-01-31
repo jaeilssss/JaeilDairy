@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from service.model.user.logout_model import LogoutRequest
+from src.service.model.user.logout_model import LogoutRequest
 from src.service.model.find_my_user_info_model import FindMyUserInfoModel
 from src.service.model.renew_token_model import RenewTokenModel
 from src.service.model import SignUpModel

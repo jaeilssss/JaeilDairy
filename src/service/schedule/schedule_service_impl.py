@@ -1,6 +1,6 @@
 import json
-from service.model.schedule.get_my_schedule import GetMySchedule
-from service.redis.redis_service import RedisService
+from src.service.model.schedule.get_my_schedule import GetMySchedule
+from src.service.redis.redis_service import RedisService
 from src.common.exception.schedule_exception import NotDeleteException
 from src.service.model.schedule.delete_my_schedule import DeleteMySchedule
 from src.service.model.schedule.modify_my_schedule import ModifyMySchedule

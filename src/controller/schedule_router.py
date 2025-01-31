@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Path
 from dependency_injector.wiring import Provide, inject
 from container import AppContainer
-from controller.model.response import BaseResponse, BaseResponseData
+from src.controller.model.response import BaseResponse, BaseResponseData
 from src.service.model.schedule.delete_my_schedule import DeleteMySchedule
 from src.service.model.schedule.modify_my_schedule import ModifyMySchedule
 from src.controller.model.schedule.put_modify_my_schedule_body_model import (
