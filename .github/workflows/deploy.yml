@@ -1,0 +1,39 @@
+name: Deploy to AWS via Bastion Host
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: deploy-dev # ✅ 배포 환경을 deploy-dev로 설정
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup SSH Key and Known Hosts
+        run: |
+          set +x
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.BASTION_HOST }} >> ~/.ssh/known_hosts
+          set -x
+
+      - name: Get Private IP dynamically
+        run: |
+          PRIVATE_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=my-private-instance" --query "Reservations[*].Instances[*].PrivateIpAddress" --output text)
+          echo "PRIVATE_IP=${PRIVATE_IP}" >> $GITHUB_ENV
+
+      - name: SSH into Bastion and Deploy to Private EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -A ${{ secrets.BASTION_USER }}@${{ secrets.BASTION_HOST }} << 'EOF'
+            ssh -o StrictHostKeyChecking=no ec2-user@$PRIVATE_IP << 'INNER_EOF'
+              cd /var/www/app  # ✅ 배포할 디렉토리 확인
+              git pull origin main
+              docker-compose up -d --build  # ✅ Docker 여부 확인
+            INNER_EOF
+          EOF
