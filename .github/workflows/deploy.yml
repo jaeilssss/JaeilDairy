@@ -1,4 +1,4 @@
-name: Deploy to AWS via Bastion Host
+name: Deploy to AWS via Bastion Host with Docker
 
 on:
   push:
@@ -14,14 +14,23 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Setup SSH Key and Known Hosts
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
         run: |
-          set +x
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.BASTION_HOST }} >> ~/.ssh/known_hosts
-          set -x
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REPOSITORY }}
+
+      - name: Build and Push Docker Image
+        run: |
+          IMAGE_TAG=$(date +%s)
+          docker build -t ${{ secrets.ECR_REPOSITORY }}:$IMAGE_TAG .
+          docker push ${{ secrets.ECR_REPOSITORY }}:$IMAGE_TAG
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV  # EC2에서 사용할 이미지 태그 저장
 
       - name: Get Private IP dynamically
         run: |
@@ -32,8 +41,10 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -A ${{ secrets.BASTION_USER }}@${{ secrets.BASTION_HOST }} << 'EOF'
             ssh -o StrictHostKeyChecking=no ec2-user@$PRIVATE_IP << 'INNER_EOF'
-              cd /var/www/app  # ✅ 배포할 디렉토리 확인
-              git pull origin main
-              docker-compose up -d --build  # ✅ Docker 여부 확인
+              aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REPOSITORY }}
+              docker pull ${{ secrets.ECR_REPOSITORY }}:$IMAGE_TAG
+              docker stop my-app || true
+              docker rm my-app || true
+              docker run -d --name my-app -p 80:8000 ${{ secrets.ECR_REPOSITORY }}:$IMAGE_TAG
             INNER_EOF
           EOF
